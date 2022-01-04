@@ -1,7 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:secondsapp/pages/detail.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class HomePage extends StatefulWidget {
   // const HomePage({ Key? key }) : super(key: key);
@@ -27,21 +28,22 @@ class _HomePageState extends State<HomePage> {
       body: Padding(
           padding: EdgeInsets.all(10),
           child: FutureBuilder(
-            builder: (context, snapshot) {
-              var data = json.decode(snapshot.data.toString());
+            builder: (context, AsyncSnapshot snapshot) {
+              // var data = json.decode(snapshot.data.toString());
               return ListView.builder(
                 itemBuilder: (BuildContext context, int index) {
                   return myBox(
-                      data[index]['title'],
-                      data[index]['subtitle'].substring(0, 40),
-                      data[index]['image_url'],
-                      data[index]['detail']);
+                      snapshot.data[index]['title'],
+                      snapshot.data[index]['subtitle'].substring(0, 40),
+                      snapshot.data[index]['image_url'],
+                      snapshot.data[index]['detail']);
                 },
-                itemCount: data.length,
+                itemCount: snapshot.data.length,
               );
             },
-            future:
-                DefaultAssetBundle.of(context).loadString('assets/data.json'),
+            future: getData(),
+            // future:
+            // DefaultAssetBundle.of(context).loadString('assets/data.json'),
           )),
     );
   }
@@ -112,5 +114,14 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
     );
+  }
+
+  Future getData() async {
+    //https://raw.githubusercontent.com/Freezfluke/BasicAPI/main/data.json
+    var url = Uri.https(
+        'raw.githubusercontent.com', '/Freezfluke/BasicAPI/main/data.json');
+    var response = await http.get(url);
+    var result = json.decode(response.body);
+    return result;
   }
 }
